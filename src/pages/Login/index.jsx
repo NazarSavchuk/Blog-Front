@@ -16,7 +16,6 @@ export const Login = () => {
   const {
     register,
     handleSubmit,
-    setError,
     formState: { errors, isValid },
   } = useForm({
     defaultValues: {
@@ -26,11 +25,17 @@ export const Login = () => {
     mode: "all",
   });
 
-  const onSubmit = (values) => {
-    dispatch(fetchAuth(values));
-  };
+  const onSubmit = async (values) => {
+    const data = await dispatch(fetchAuth(values));
 
-  React.useEffect();
+    if (!data.payload) {
+      return alert("Can't authorize");
+    }
+
+    if ("token" in data.payload) {
+      window.localStorage.setItem("token", data.payload.token);
+    }
+  };
 
   if (isAuth) {
     return <Navigate to="/" />;
@@ -60,7 +65,12 @@ export const Login = () => {
           {...register("password", { required: "Enter password" })}
           fullWidth
         />
-        <Button type="submit" size="large" variant="contained" fullWidth>
+        <Button
+          type="submit"
+          size="large"
+          disabled={!isValid}
+          variant="contained"
+          fullWidth>
           Login
         </Button>
       </form>
