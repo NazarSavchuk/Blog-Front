@@ -18,7 +18,11 @@ export const fetchRegister = createAsyncThunk(
 );
 
 export const fetchAuthMe = createAsyncThunk("auth/fetchAuthMe", async () => {
-  const { data } = await axios.get("http://localhost:4444/auth/me");
+  const { data } = await axios.get("http://localhost:4444/auth/me", {
+    headers: {
+      authorization: window.localStorage.getItem("token"),
+    },
+  });
   return data;
 });
 

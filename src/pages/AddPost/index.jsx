@@ -8,24 +8,75 @@ import "easymde/dist/easymde.min.css";
 import styles from "./AddPost.module.scss";
 import { useSelector } from "react-redux";
 import { selectIsAuth } from "../../redux/slices/auth";
-import { Navigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
+import axios from "axios";
 
 export const AddPost = () => {
-  const imageUrl = "";
+  const navigate = useNavigate();
   const isAuth = useSelector(selectIsAuth);
+  const [isLoading, setLoading] = React.useState(false);
+
   const [title, setTitle] = React.useState("");
   const [tags, setTags] = React.useState("");
-  const [value, setValue] = React.useState("");
+  const [text, setText] = React.useState("");
+  const [imageUrl, setImageUrl] = React.useState("");
 
   const inputFileRef = React.useRef(null);
 
-  const handleChangeFile = () => {};
+  const handleChangeFile = async (event) => {
+    try {
+      const formData = new FormData();
+      const file = event.target.files[0];
+      formData.append("image", file);
+      const { data } = await axios.post(
+        "http://localhost:4444/upload",
+        formData,
+        {
+          headers: {
+            authorization: window.localStorage.getItem("token"),
+          },
+        }
+      );
+      setImageUrl(data.url);
+    } catch (err) {
+      console.warn(err);
+      alert("Error in uploading");
+    }
+  };
 
-  const onClickRemoveImage = () => {};
+  const onClickRemoveImage = () => {
+    setImageUrl("");
+  };
 
   const onChange = React.useCallback((value) => {
-    setValue(value);
+    setText(value);
   }, []);
+
+  const onSubmit = async () => {
+    try {
+      setLoading(true);
+
+      const fields = {
+        title,
+        imageUrl,
+        tags: tags.split(","),
+        text,
+      };
+
+      const { data } = await axios.post("http://localhost:4444/posts", fields, {
+        headers: {
+          authorization: window.localStorage.getItem("token"),
+        },
+      });
+
+      const id = data.post._id;
+
+      navigate(`/posts/${id}`);
+    } catch (error) {
+      console.warn(error);
+      alert("Error in creating");
+    }
+  };
 
   const options = React.useMemo(
     () => ({
@@ -48,7 +99,10 @@ export const AddPost = () => {
 
   return (
     <Paper style={{ padding: 30 }}>
-      <Button variant="outlined" size="large">
+      <Button
+        onClick={() => inputFileRef.current.click()}
+        variant="outlined"
+        size="large">
         Upload preview
       </Button>
       <input
@@ -58,16 +112,19 @@ export const AddPost = () => {
         hidden
       />
       {imageUrl && (
-        <Button variant="contained" color="error" onClick={onClickRemoveImage}>
-          Delete
-        </Button>
-      )}
-      {imageUrl && (
-        <img
-          className={styles.image}
-          src={`http://localhost:4444${imageUrl}`}
-          alt="Uploaded"
-        />
+        <>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={onClickRemoveImage}>
+            Delete
+          </Button>
+          <img
+            className={styles.image}
+            src={`http://localhost:4444${imageUrl}`}
+            alt="Uploaded"
+          />
+        </>
       )}
       <br />
       <br />
@@ -89,12 +146,12 @@ export const AddPost = () => {
       />
       <SimpleMDE
         className={styles.editor}
-        value={value}
+        value={text}
         onChange={onChange}
         options={options}
       />
       <div className={styles.buttons}>
-        <Button size="large" variant="contained">
+        <Button onClick={onSubmit} size="large" variant="contained">
           Publish
         </Button>
         <a href="/">
