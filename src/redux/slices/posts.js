@@ -14,7 +14,7 @@ export const fetchTags = createAsyncThunk("posts/fetchTags", async () => {
 export const fetchRemovePost = createAsyncThunk(
   "auth/fetchAuthMe",
   async (id) => {
-    await axios.delete(`http://localhost:4444/posts/${id}`);
+    await axios.delete(`${process.env.REACT_APP_API_URL}/posts/${id}`);
   }
 );
 
