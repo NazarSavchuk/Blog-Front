@@ -14,11 +14,7 @@ export const fetchTags = createAsyncThunk("posts/fetchTags", async () => {
 export const fetchRemovePost = createAsyncThunk(
   "auth/fetchAuthMe",
   async (id) => {
-    await axios.delete(`http://localhost:4444/posts/${id}`, {
-      headers: {
-        authorization: window.localStorage.getItem("token"),
-      },
-    });
+    await axios.delete(`http://localhost:4444/posts/${id}`);
   }
 );
 
@@ -62,7 +58,7 @@ const postSlice = createSlice({
     },
     [fetchRemovePost.pending]: (state, action) => {
       state.posts.items = state.posts.items.filter(
-        (obj) => obj._id === action.payload
+        (obj) => obj._id !== action.meta.arg
       );
     },
   },

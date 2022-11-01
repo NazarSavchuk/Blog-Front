@@ -34,7 +34,7 @@ export const FullPost = () => {
       <Post
         id={data.id}
         title={data.title}
-        imageUrl={`http://localhost:4444${data.imageUrl}`}
+        imageUrl={data.imageUrl ? `http://localhost:4444${data.imageUrl}` : ""}
         user={{
           avatarUrl: data.user.avatarUrl,
           fullName: data.user.fullName,
@@ -42,7 +42,7 @@ export const FullPost = () => {
         createdAt={data.createdAt}
         viewsCount={data.viewsCount}
         commentsCount={data.commentsCount}
-        tags={["react", "fun", "typescript"]}
+        tags={data.tags}
         isFullPost>
         <ReactMarkdown children={data.text} />
       </Post>
